@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, LayoutDashboard, PenSquare, History, CalendarDays, BarChart2, Printer, Calendar } from 'lucide-react';
+import { Cpu, LayoutDashboard, PenSquare, History, CalendarDays, BarChart2, Printer, Calendar, Lock } from 'lucide-react';
 import DashboardView from './components/DashboardView';
 import FormView from './components/FormView';
 import HistoryView from './components/HistoryView';
@@ -13,21 +13,68 @@ const API_URL = '/api/reports';
 function App() {
   const [reports, setReports] = useState([]);
   const [activeTab, setActiveTab] = useState('weekly');
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [loginError, setLoginError] = useState('');
 
   const fetchReports = async () => {
     try {
       const res = await fetch(API_URL);
-      const data = await res.json();
-      data.sort((a, b) => new Date(b.date) - new Date(a.date));
-      setReports(data);
+      if (res.status === 401) {
+        setIsAuthenticated(false);
+        setLoginError('비밀번호가 틀렸습니다.');
+        return;
+      }
+      if (res.ok) {
+        setIsAuthenticated(true);
+        setLoginError('');
+        const data = await res.json();
+        data.sort((a, b) => new Date(b.date) - new Date(a.date));
+        setReports(data);
+      }
     } catch (err) {
       console.error("Failed to fetch reports:", err);
     }
   };
 
+  const handleLogin = (e) => {
+    e.preventDefault();
+    localStorage.setItem('team_password', passwordInput);
+    fetchReports(); // This will trigger the API call with the new password in interceptor
+  };
+
   useEffect(() => {
     fetchReports();
   }, []);
+
+  if (!isAuthenticated) {
+    return (
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: 'var(--bg-secondary)' }}>
+        <div style={{ backgroundColor: 'white', padding: '3rem', borderRadius: '1rem', boxShadow: '0 10px 25px rgba(0,0,0,0.05)', textAlign: 'center', maxWidth: '400px', width: '100%' }}>
+          <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '1.5rem' }}>
+            <div style={{ backgroundColor: 'var(--accent-light)', padding: '1rem', borderRadius: '50%' }}>
+              <Lock size={32} color="var(--accent-primary)" />
+            </div>
+          </div>
+          <h2 style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}>금속기술팀 주간업무보드</h2>
+          <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>팀 공통 비밀번호를 입력해주세요.</p>
+          <form onSubmit={handleLogin}>
+            <input 
+              type="password" 
+              value={passwordInput}
+              onChange={(e) => setPasswordInput(e.target.value)}
+              placeholder="비밀번호" 
+              style={{ width: '100%', padding: '0.75rem', borderRadius: '0.5rem', border: '1px solid var(--border-color)', marginBottom: '1rem', boxSizing: 'border-box' }}
+            />
+            {loginError && <p style={{ color: '#ef4444', fontSize: '0.875rem', marginBottom: '1rem', textAlign: 'left' }}>{loginError}</p>}
+            <button type="submit" style={{ width: '100%', padding: '0.75rem', backgroundColor: 'var(--accent-primary)', color: 'white', border: 'none', borderRadius: '0.5rem', cursor: 'pointer', fontWeight: 'bold' }}>
+              접속하기
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="app-container">

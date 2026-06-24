@@ -32,6 +32,22 @@ const upload = multer({
 });
 
 // ==========================================
+// Security Middleware (API Protection)
+// ==========================================
+const TEAM_PASSWORD = process.env.TEAM_PASSWORD || 'metal2026';
+
+app.use('/api', (req, res, next) => {
+  // Allow CORS preflight requests
+  if (req.method === 'OPTIONS') return next();
+  
+  const providedPassword = req.headers['x-team-password'];
+  if (providedPassword !== TEAM_PASSWORD) {
+    return res.status(401).json({ error: 'Unauthorized: Invalid Team Password' });
+  }
+  next();
+});
+
+// ==========================================
 // API Routes
 // ==========================================
 
