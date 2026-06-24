@@ -13,7 +13,7 @@ app.use(express.json());
 // ==========================================
 // Google Cloud Firestore Configuration
 // ==========================================
-const firestore = new Firestore();
+const firestore = new Firestore({ databaseId: 'metal-weekly-db' });
 const reportsCollection = firestore.collection('reports');
 
 // ==========================================
