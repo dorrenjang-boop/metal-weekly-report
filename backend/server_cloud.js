@@ -118,8 +118,8 @@ app.use((req, res, next) => {
   res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
-// VERY IMPORTANT: Listen on port 80 for Google Cloud
-const PORT = 80;
+// VERY IMPORTANT: Listen on port provided by Cloud Run
+const PORT = process.env.PORT || 8080;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Cloud Server is running on Port ${PORT}`);
 });
