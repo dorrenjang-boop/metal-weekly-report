@@ -110,6 +110,7 @@ export function generatePrintableReport(reports) {
     // This Week
     if (r.thisWeekTask || r.task) {
       let currentProject = "기타 업무";
+      let currentMinor = "";
       const text = r.thisWeekTask || r.task;
       const lines = text.split('\n');
       
@@ -120,19 +121,29 @@ export function generatePrintableReport(reports) {
 
         const match = cleanLine.match(/^\[(.*?)\]/);
         if (match) {
-          // Normalize double brackets like [[5축가공기]
           const rawTag = match[1].replace(/^\[+/, '').trim();
-          currentProject = standardizeProjectName(rawTag);
+          const std = standardizeProjectName(rawTag);
+          if (std.includes(' - ')) {
+            const parts = std.split(' - ');
+            currentProject = parts[0].trim();
+            currentMinor = parts.slice(1).join(' - ').trim();
+          } else {
+            currentProject = std;
+            currentMinor = '';
+          }
+
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
           if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
             if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = [];
             const displayLine = remainingText.replace(/^[-•*]?\s*/, '');
-            result.thisWeek[currentProject].push(`${displayLine} (${r.name.split(' ')[0]})`);
+            const prefix = currentMinor ? `[${currentMinor}] ` : '';
+            result.thisWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
           }
         } else {
           if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = [];
           const displayLine = cleanLine.replace(/^[-•*]?\s*/, '');
-          result.thisWeek[currentProject].push(`${displayLine} (${r.name.split(' ')[0]})`);
+          const prefix = currentMinor ? `[${currentMinor}] ` : '';
+          result.thisWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
         }
       });
     }
@@ -140,6 +151,7 @@ export function generatePrintableReport(reports) {
     // Next Week
     if (r.nextWeekTask) {
       let currentProject = "기타 업무";
+      let currentMinor = "";
       const lines = r.nextWeekTask.split('\n');
       
       lines.forEach(line => {
@@ -150,17 +162,28 @@ export function generatePrintableReport(reports) {
         const match = cleanLine.match(/^\[(.*?)\]/);
         if (match) {
           const rawTag = match[1].replace(/^\[+/, '').trim();
-          currentProject = standardizeProjectName(rawTag);
+          const std = standardizeProjectName(rawTag);
+          if (std.includes(' - ')) {
+            const parts = std.split(' - ');
+            currentProject = parts[0].trim();
+            currentMinor = parts.slice(1).join(' - ').trim();
+          } else {
+            currentProject = std;
+            currentMinor = '';
+          }
+
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
           if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
             if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = [];
             const displayLine = remainingText.replace(/^[-•*]?\s*/, '');
-            result.nextWeek[currentProject].push(`${displayLine} (${r.name.split(' ')[0]})`);
+            const prefix = currentMinor ? `[${currentMinor}] ` : '';
+            result.nextWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
           }
         } else {
           if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = [];
           const displayLine = cleanLine.replace(/^[-•*]?\s*/, '');
-          result.nextWeek[currentProject].push(`${displayLine} (${r.name.split(' ')[0]})`);
+          const prefix = currentMinor ? `[${currentMinor}] ` : '';
+          result.nextWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
         }
       });
     }

@@ -60,11 +60,20 @@ export default function WeeklyView({ reports, fetchReports }) {
         });
 
         let currentProject = '공통/기타';
+        let currentMinor = '';
         
         lines.forEach(line => {
           const match = line.match(/\[(.*?)\]/);
           if (match) {
-            currentProject = standardizeProjectName(match[1]);
+            const std = standardizeProjectName(match[1]);
+            if (std.includes(' - ')) {
+              const parts = std.split(' - ');
+              currentProject = parts[0].trim();
+              currentMinor = parts.slice(1).join(' - ').trim();
+            } else {
+              currentProject = std;
+              currentMinor = '';
+            }
           }
           
           if (!projects[currentProject]) {
@@ -74,9 +83,10 @@ export default function WeeklyView({ reports, fetchReports }) {
           // 태그 제거 후 텍스트 추출
           let cleanText = line.replace(/\[.*?\]/, '').replace(/^[\s\-\*]+/, '').trim();
           if (cleanText) {
+            const textToPush = currentMinor ? `[${currentMinor}] ${cleanText}` : cleanText;
             projects[currentProject][taskType === 'thisWeekTask' ? 'thisWeek' : 'nextWeek'].push({
               user: report.name,
-              text: cleanText
+              text: textToPush
             });
           }
         });
