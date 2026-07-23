@@ -1,3 +1,5 @@
+import { isMajorTag } from './taxonomy';
+
 // Keyword List
 export const KEYWORDS_DICTIONARY = [
   // 소재
@@ -127,9 +129,16 @@ export function generatePrintableReport(reports) {
             const parts = std.split(' - ');
             currentProject = parts[0].trim();
             currentMinor = parts.slice(1).join(' - ').trim();
-          } else {
+          } else if (isMajorTag(std)) {
             currentProject = std;
             currentMinor = '';
+          } else {
+            if (currentProject === "기타 업무") {
+              currentProject = std;
+              currentMinor = '';
+            } else {
+              currentMinor = std;
+            }
           }
 
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
@@ -181,9 +190,16 @@ export function generatePrintableReport(reports) {
             const parts = std.split(' - ');
             currentProject = parts[0].trim();
             currentMinor = parts.slice(1).join(' - ').trim();
-          } else {
+          } else if (isMajorTag(std)) {
             currentProject = std;
             currentMinor = '';
+          } else {
+            if (currentProject === "기타 업무") {
+              currentProject = std;
+              currentMinor = '';
+            } else {
+              currentMinor = std;
+            }
           }
 
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();

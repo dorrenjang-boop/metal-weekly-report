@@ -1,5 +1,6 @@
 import React, { useMemo, useState } from 'react';
 import { getWeekString, standardizeProjectName } from '../utils/analyze';
+import { isMajorTag } from '../utils/taxonomy';
 import { Calendar, User, Check, ChevronRight, Trash2, FolderKanban, Users, Pencil, Save, X } from 'lucide-react';
 
 // "해당 없음" 필터링 및 텍스트 정리 함수
@@ -70,9 +71,16 @@ export default function WeeklyView({ reports, fetchReports }) {
               const parts = std.split(' - ');
               currentProject = parts[0].trim();
               currentMinor = parts.slice(1).join(' - ').trim();
-            } else {
+            } else if (isMajorTag(std)) {
               currentProject = std;
               currentMinor = '';
+            } else {
+              if (currentProject === '공통/기타') {
+                currentProject = std;
+                currentMinor = '';
+              } else {
+                currentMinor = std;
+              }
             }
           }
           
