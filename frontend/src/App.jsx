@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, LayoutDashboard, PenSquare, History, CalendarDays, BarChart2, Printer, Calendar, Lock } from 'lucide-react';
+import { Cpu, LayoutDashboard, PenSquare, History, CalendarDays, BarChart2, Printer, Calendar, Lock, Database, Activity, Hammer } from 'lucide-react';
 import DashboardView from './components/DashboardView';
 import FormView from './components/FormView';
 import HistoryView from './components/HistoryView';
@@ -7,12 +7,17 @@ import WeeklyView from './components/WeeklyView';
 import AnalyticsView from './components/AnalyticsView';
 import ReportView from './components/ReportView';
 import ArchiveView from './components/ArchiveView';
+import BuildLogsView from './components/BuildLogsView';
+import OeeView from './components/OeeView';
 
 const API_URL = '/api/reports';
 
 function App() {
   const [reports, setReports] = useState([]);
-  const [activeTab, setActiveTab] = useState('weekly');
+  const [mainMenu, setMainMenu] = useState('weekly'); // 'weekly' or 'build_management'
+  const [activeTab, setActiveTab] = useState('dashboard'); // sub-tabs
+  const [buildTab, setBuildTab] = useState('board'); // 'board', 'oee', 'dashboard'
+  
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -40,7 +45,7 @@ function App() {
   const handleLogin = (e) => {
     e.preventDefault();
     localStorage.setItem('team_password', passwordInput);
-    fetchReports(); // This will trigger the API call with the new password in interceptor
+    fetchReports();
   };
 
   useEffect(() => {
@@ -56,7 +61,7 @@ function App() {
               <Lock size={32} color="var(--accent-primary)" />
             </div>
           </div>
-          <h2 style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}>금속기술팀 주간업무보드</h2>
+          <h2 style={{ marginBottom: '0.5rem', color: 'var(--text-primary)' }}>금속기술팀 통합 시스템</h2>
           <p style={{ color: 'var(--text-secondary)', marginBottom: '2rem' }}>팀 공통 비밀번호를 입력해주세요.</p>
           <form onSubmit={handleLogin}>
             <input 
@@ -77,76 +82,74 @@ function App() {
   }
 
   return (
-    <div className="app-container">
-      {/* Top Navigation */}
-      <div className="top-nav print-hide">
-        <div className="nav-brand">
-          <Cpu size={24} color="var(--accent-primary)" /> 
-          DM사업부 금속기술팀 주간업무보드
+    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--bg-secondary)' }}>
+      {/* Left Main Sidebar */}
+      <div style={{ width: '260px', backgroundColor: '#ffffff', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
+        <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)' }}>
+          <Cpu size={28} color="var(--accent-primary)" />
+          <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>금속기술팀 시스템</span>
         </div>
-        <div className="nav-menu">
+        <div style={{ padding: '20px 10px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
           <div 
-            className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`}
-            onClick={() => setActiveTab('dashboard')}
+            onClick={() => setMainMenu('weekly')}
+            style={{ padding: '12px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '500', backgroundColor: mainMenu === 'weekly' ? 'var(--accent-light)' : 'transparent', color: mainMenu === 'weekly' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}
           >
-            <LayoutDashboard size={18} />
-            인사이트 대시보드
+            <CalendarDays size={20} />
+            주간업무보고
           </div>
           <div 
-            className={`nav-item ${activeTab === 'weekly' ? 'active' : ''}`}
-            onClick={() => setActiveTab('weekly')}
+            onClick={() => setMainMenu('build_management')}
+            style={{ padding: '12px 16px', borderRadius: '8px', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '12px', fontWeight: '500', backgroundColor: mainMenu === 'build_management' ? 'var(--accent-light)' : 'transparent', color: mainMenu === 'build_management' ? 'var(--accent-primary)' : 'var(--text-secondary)' }}
           >
-            <CalendarDays size={18} />
-            주차별 업무
-          </div>
-          <div 
-            className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`}
-            onClick={() => setActiveTab('analytics')}
-          >
-            <BarChart2 size={18} />
-            주제·키워드 분석
-          </div>
-          <div 
-            className={`nav-item ${activeTab === 'history' ? 'active' : ''}`}
-            onClick={() => setActiveTab('history')}
-          >
-            <History size={18} />
-            전체 이력 검색
-          </div>
-          <div 
-            className={`nav-item ${activeTab === 'form' ? 'active' : ''}`}
-            onClick={() => setActiveTab('form')}
-          >
-            <PenSquare size={18} />
-            주간 업무 작성
-          </div>
-          <div 
-            className={`nav-item ${activeTab === 'report' ? 'active' : ''}`}
-            onClick={() => setActiveTab('report')}
-            style={{ borderLeft: '1px solid var(--border-color)', paddingLeft: '1.5rem', marginLeft: '0.5rem', color: '#1d4ed8' }}
-          >
-            <Printer size={18} />
-            보고서 (인쇄용)
-          </div>
-          <div 
-            className={`nav-item ${activeTab === 'archive' ? 'active' : ''}`}
-            onClick={() => setActiveTab('archive')}
-          >
-            <Calendar size={18} />
-            연도별 아카이브
+            <Database size={20} />
+            빌드 이력 및 OEE
           </div>
         </div>
       </div>
 
-      {/* Main Content */}
-      <div className={`main-content ${activeTab === 'report' ? 'print-mode' : ''}`}>
-        {activeTab === 'dashboard' && <DashboardView reports={reports} />}
-        {activeTab === 'weekly' && <WeeklyView reports={reports} fetchReports={fetchReports} />}
-        {activeTab === 'analytics' && <AnalyticsView reports={reports} />}
-        {activeTab === 'history' && <HistoryView reports={reports} />}
-        {activeTab === 'form' && <FormView onReportAdded={() => { fetchReports(); setActiveTab('weekly'); }} />}
-        {activeTab === 'report' && <ReportView reports={reports} />}
-        {activeTab === 'archive' && <ArchiveView />}
+      {/* Main Content Area */}
+      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+        
+        {mainMenu === 'weekly' && (
+          <div className="app-container" style={{ margin: 0, height: '100%', borderRadius: 0, boxShadow: 'none' }}>
+            <div className="top-nav print-hide" style={{ borderRadius: 0 }}>
+              <div className="nav-menu" style={{ margin: 0 }}>
+                <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><LayoutDashboard size={18} />인사이트 대시보드</div>
+                <div className={`nav-item ${activeTab === 'weekly' ? 'active' : ''}`} onClick={() => setActiveTab('weekly')}><CalendarDays size={18} />주차별 업무</div>
+                <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}><BarChart2 size={18} />주제·키워드 분석</div>
+                <div className={`nav-item ${activeTab === 'history' ? 'active' : ''}`} onClick={() => setActiveTab('history')}><History size={18} />전체 이력 검색</div>
+                <div className={`nav-item ${activeTab === 'form' ? 'active' : ''}`} onClick={() => setActiveTab('form')}><PenSquare size={18} />주간 업무 작성</div>
+                <div className={`nav-item ${activeTab === 'report' ? 'active' : ''}`} onClick={() => setActiveTab('report')} style={{ borderLeft: '1px solid var(--border-color)', paddingLeft: '1.5rem', marginLeft: '0.5rem', color: '#1d4ed8' }}><Printer size={18} />보고서 (인쇄용)</div>
+                <div className={`nav-item ${activeTab === 'archive' ? 'active' : ''}`} onClick={() => setActiveTab('archive')}><Calendar size={18} />연도별 아카이브</div>
+              </div>
+            </div>
+            <div className={`main-content ${activeTab === 'report' ? 'print-mode' : ''}`}>
+              {activeTab === 'dashboard' && <DashboardView reports={reports} />}
+              {activeTab === 'weekly' && <WeeklyView reports={reports} fetchReports={fetchReports} />}
+              {activeTab === 'analytics' && <AnalyticsView reports={reports} />}
+              {activeTab === 'history' && <HistoryView reports={reports} />}
+              {activeTab === 'form' && <FormView onReportAdded={() => { fetchReports(); setActiveTab('weekly'); }} />}
+              {activeTab === 'report' && <ReportView reports={reports} />}
+              {activeTab === 'archive' && <ArchiveView />}
+            </div>
+          </div>
+        )}
+
+        {mainMenu === 'build_management' && (
+          <div className="app-container" style={{ margin: 0, height: '100%', borderRadius: 0, boxShadow: 'none' }}>
+            <div className="top-nav print-hide" style={{ borderRadius: 0 }}>
+              <div className="nav-menu" style={{ margin: 0 }}>
+                <div className={`nav-item ${buildTab === 'board' ? 'active' : ''}`} onClick={() => setBuildTab('board')}><Hammer size={18} />빌드 이력 보드</div>
+                <div className={`nav-item ${buildTab === 'oee' ? 'active' : ''}`} onClick={() => setBuildTab('oee')}><Activity size={18} />OEE 분석</div>
+              </div>
+            </div>
+            <div className="main-content" style={{ padding: '20px', backgroundColor: 'var(--bg-secondary)', overflowY: 'auto' }}>
+              {buildTab === 'board' && <BuildLogsView />}
+              {buildTab === 'oee' && <OeeView />}
+            </div>
+          </div>
+        )}
+
       </div>
     </div>
   );

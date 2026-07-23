@@ -119,8 +119,26 @@ export default function FormView({ onReportAdded }) {
         <p>복잡한 양식 없이 금주 진행 사항과 차주 계획을 나열식으로 편하게 작성하세요.</p>
         <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', color: '#166534', padding: '1rem', borderRadius: '8px', marginTop: '1rem', fontWeight: 'bold', display: 'inline-block', textAlign: 'left' }}>
           💡 [스마트 작성 규칙]<br/>
-          매번 대괄호를 쓸 필요 없이, <b>[프로젝트명]</b>을 한 번만 적고 줄바꿈을 하세요!<br/>
+          매번 대괄호를 직접 칠 필요 없이 아래 버튼을 클릭하면 빠르게 태그가 삽입됩니다!<br/>
           그 아래에 적는 모든 내용은 다음 대괄호가 나오기 전까지 해당 프로젝트로 자동 묶음 처리됩니다.
+          
+          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
+            {['[EOS M290]', '[A40PM]', '[A65PM]', '[LIG]', '[연구개발]', '[공통]'].map(tag => (
+              <button 
+                key={tag}
+                type="button"
+                onClick={() => {
+                  setThisWeekTask(prev => prev + (prev ? '\n\n' : '') + tag + '\n- ');
+                }}
+                style={{ 
+                  backgroundColor: '#fff', border: '1px solid #22c55e', color: '#15803d',
+                  padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem'
+                }}
+              >
+                + {tag}
+              </button>
+            ))}
+          </div>
         </div>
       </div>
 

@@ -6,10 +6,12 @@ const path = require('path');
 const { Firestore } = require('@google-cloud/firestore');
 const multer = require('multer');
 const { Storage } = require('@google-cloud/storage');
+const db = require('./db');
 
 const app = express();
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increased for Base64 image uploads
+app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
 // ==========================================
 // Google Cloud Firestore Configuration
@@ -79,13 +81,13 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   blobStream.end(req.file.buffer);
 });
 
+// Local Mock for Reports to prevent Firestore crashes locally
+let mockReports = [];
+
 app.get('/api/reports', async (req, res) => {
   try {
-    const snapshot = await reportsCollection.orderBy('date', 'desc').get();
-    const reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-    res.json(reports);
+    res.json(mockReports);
   } catch (err) {
-    console.error('Firestore GET error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -94,32 +96,100 @@ app.post('/api/reports', async (req, res) => {
   try {
     const newReport = req.body;
     const id = Date.now().toString();
-    
-    await reportsCollection.doc(id).set({
-      date: newReport.date,
-      name: newReport.name,
-      thisWeekTask: newReport.thisWeekTask || '',
-      nextWeekTask: newReport.nextWeekTask || '',
-      project: newReport.project || '',
-      printer: newReport.printer || '',
-      keywords: newReport.keywords || '',
-      imagePath: newReport.imagePath || ''
-    });
-
+    mockReports.push({ id, ...newReport });
     res.json({ message: 'Success', id });
   } catch (err) {
-    console.error('Firestore POST error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
 app.delete('/api/reports/:id', async (req, res) => {
   try {
-    await reportsCollection.doc(req.params.id).delete();
+    mockReports = mockReports.filter(r => r.id !== req.params.id);
     res.json({ message: 'Deleted successfully' });
   } catch (err) {
-    console.error('Firestore DELETE error:', err);
     res.status(500).json({ error: 'Database error' });
+  }
+});
+
+app.put('/api/reports/:id', async (req, res) => {
+  try {
+    const index = mockReports.findIndex(r => r.id === req.params.id);
+    if (index !== -1) {
+      mockReports[index] = { ...mockReports[index], ...req.body };
+      res.json({ message: 'Updated successfully' });
+    } else {
+      res.status(404).json({ error: 'Not found' });
+    }
+  } catch (err) {
+    res.status(500).json({ error: 'Database error' });
+  }
+});
+
+// ==========================================
+// Phase 3 - Mock DB API Routes (Dynamic Parsing & OEE Auto)
+// ==========================================
+app.get('/api/metadata', async (req, res) => {
+  try {
+    const meta = await db.getMetadata();
+    res.json(meta);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch metadata' });
+  }
+});
+
+app.get('/api/machines', async (req, res) => {
+  try {
+    const meta = await db.getMetadata();
+    res.json(meta.machines);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch machines' });
+  }
+});
+
+app.get('/api/builds', async (req, res) => {
+  try {
+    const builds = await db.getBuildLogs();
+    res.json(builds);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch build logs' });
+  }
+});
+
+app.post('/api/builds', async (req, res) => {
+  try {
+    const newBuild = await db.addBuildLog(req.body);
+    res.json({ message: 'Success', id: newBuild.id, data: newBuild });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add build log' });
+  }
+});
+
+app.put('/api/builds/:id', async (req, res) => {
+  try {
+    const updated = await db.updateBuildLog(req.params.id, req.body);
+    res.json({ message: 'Success', data: updated });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update build log' });
+  }
+});
+
+app.delete('/api/builds/:id', async (req, res) => {
+  try {
+    await db.deleteBuildLog(req.params.id);
+    res.json({ message: 'Deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete build log' });
+  }
+});
+
+app.get('/api/oee', async (req, res) => {
+  try {
+    // OEE is now automatically calculated from build logs
+    const oeeData = await db.getOEERecords();
+    res.json(oeeData);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch automated OEE records' });
   }
 });
 

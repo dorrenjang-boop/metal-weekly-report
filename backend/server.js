@@ -173,6 +173,87 @@ app.delete('/api/reports/:id', (req, res) => {
   });
 });
 
+// UPDATE a report
+app.put('/api/reports/:id', (req, res) => {
+  const id = req.params.id;
+  const { thisWeekTask, nextWeekTask } = req.body;
+  
+  const stmt = db.prepare('UPDATE reports SET thisWeekTask = ?, nextWeekTask = ? WHERE id = ?');
+  stmt.run(thisWeekTask || '', nextWeekTask || '', id, function(err) {
+    if (err) {
+      console.error(err);
+      return res.status(500).json({ error: 'Database error' });
+    }
+    res.json({ message: 'Updated successfully' });
+  });
+  stmt.finalize();
+});
+
+const mockDb = require('./db');
+
+app.get('/api/metadata', async (req, res) => {
+  try {
+    const meta = await mockDb.getMetadata();
+    res.json(meta);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch metadata' });
+  }
+});
+
+app.get('/api/machines', async (req, res) => {
+  try {
+    const meta = await mockDb.getMetadata();
+    res.json(meta.machines);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch machines' });
+  }
+});
+
+app.get('/api/builds', async (req, res) => {
+  try {
+    const builds = await mockDb.getBuildLogs();
+    res.json(builds);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch build logs' });
+  }
+});
+
+app.post('/api/builds', async (req, res) => {
+  try {
+    const newBuild = await mockDb.addBuildLog(req.body);
+    res.json({ message: 'Success', id: newBuild.id, data: newBuild });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to add build log' });
+  }
+});
+
+app.put('/api/builds/:id', async (req, res) => {
+  try {
+    const updated = await mockDb.updateBuildLog(req.params.id, req.body);
+    res.json({ message: 'Success', data: updated });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to update build log' });
+  }
+});
+
+app.delete('/api/builds/:id', async (req, res) => {
+  try {
+    await mockDb.deleteBuildLog(req.params.id);
+    res.json({ message: 'Deleted successfully' });
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to delete build log' });
+  }
+});
+
+app.get('/api/oee', async (req, res) => {
+  try {
+    const oeeData = await mockDb.getOEERecords();
+    res.json(oeeData);
+  } catch (err) {
+    res.status(500).json({ error: 'Failed to fetch automated OEE records' });
+  }
+});
+
 const PORT = 5000;
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Backend server is running on http://0.0.0.0:${PORT}`);
