@@ -348,15 +348,20 @@ textarea.form-control {
 
 /* --- Print Media Query for ReportView --- */
 @media print {
+  @page {
+    size: A4 landscape;
+    margin: 10mm;
+  }
   .print-hide {
     display: none !important;
   }
   .print-controls {
     display: none !important;
   }
-  body, .app-container, .main-content {
+  body, .app-root, .app-main, .app-container, .main-content {
     background-color: white !important;
     height: auto !important;
+    min-height: auto !important;
     overflow: visible !important;
     display: block !important;
     width: 100% !important;
@@ -365,7 +370,7 @@ textarea.form-control {
     background-color: white !important;
     padding: 0 !important;
   }
-  .a4-paper {
+  .a4-paper-landscape {
     box-shadow: none !important;
     width: 100% !important;
     margin: 0 !important;

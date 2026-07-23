@@ -82,9 +82,9 @@ function App() {
   }
 
   return (
-    <div style={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--bg-secondary)' }}>
+    <div className="app-root" style={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--bg-secondary)' }}>
       {/* Left Main Sidebar */}
-      <div style={{ width: '260px', backgroundColor: '#ffffff', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
+      <div className="print-hide" style={{ width: '260px', backgroundColor: '#ffffff', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
         <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)' }}>
           <Cpu size={28} color="var(--accent-primary)" />
           <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>금속기술팀 시스템</span>
@@ -108,7 +108,7 @@ function App() {
       </div>
 
       {/* Main Content Area */}
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+      <div className="app-main" style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
         
         {mainMenu === 'weekly' && (
           <div className="app-container" style={{ margin: 0, height: '100%', borderRadius: 0, boxShadow: 'none' }}>
