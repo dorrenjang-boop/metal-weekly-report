@@ -23,6 +23,23 @@ export const PROJECT_KEYWORDS = [
   "LIG", "풍산", "임플란트", "항공우주", "우나스텔라", "Limlaser"
 ];
 
+// 프로젝트명 표준화 함수
+export const standardizeProjectName = (tag) => {
+  if (!tag) return '공통/기타';
+  const t = tag.toUpperCase();
+  if (t.includes('EOS') || t.includes('M290')) return 'EOS M290';
+  if (t.includes('A40') || t.includes('A40PM')) return 'A40PM';
+  if (t.includes('A65') || t.includes('A65PM')) return 'A65PM';
+  return tag.trim();
+};
+
+// "해당 없음" 필터링 함수
+export const isNoOpLine = (text) => {
+  if (!text) return true;
+  const clean = text.replace(/[\s\-\*\.]/g, '');
+  return clean === '해당없음' || clean === '없음' || clean === '해당사항없음' || clean === 'N/A' || clean === 'NA' || clean === '';
+};
+
 // Extract Keywords from text
 export function extractKeywords(textOrObject) {
   if (!textOrObject) return [];
@@ -80,7 +97,6 @@ export function getWeekString(dateString) {
 
 // Generate structured data for the Printable Report View
 export function generatePrintableReport(reports) {
-  // We want to return { thisWeek: { "Project A": ["task1 (author)", ...], "기타 업무": [...] }, nextWeek: { ... } }
   const result = {
     thisWeek: {},
     nextWeek: {}
@@ -94,15 +110,17 @@ export function generatePrintableReport(reports) {
       const lines = text.split('\n');
       
       lines.forEach(line => {
-        if (!line) return;
+        if (!line || isNoOpLine(line)) return;
         const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
         if (cleanLine.length === 0) return;
 
         const match = cleanLine.match(/^\[(.*?)\]/);
         if (match) {
-          currentProject = match[1].trim();
+          // Normalize double brackets like [[5축가공기]
+          const rawTag = match[1].replace(/^\[+/, '').trim();
+          currentProject = standardizeProjectName(rawTag);
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
-          if (remainingText.length > 0) {
+          if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
             if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = [];
             const displayLine = remainingText.replace(/^[-•*]?\s*/, '');
             result.thisWeek[currentProject].push(`${displayLine} (${r.name.split(' ')[0]})`);
@@ -121,15 +139,16 @@ export function generatePrintableReport(reports) {
       const lines = r.nextWeekTask.split('\n');
       
       lines.forEach(line => {
-        if (!line) return;
+        if (!line || isNoOpLine(line)) return;
         const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
         if (cleanLine.length === 0) return;
 
         const match = cleanLine.match(/^\[(.*?)\]/);
         if (match) {
-          currentProject = match[1].trim();
+          const rawTag = match[1].replace(/^\[+/, '').trim();
+          currentProject = standardizeProjectName(rawTag);
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
-          if (remainingText.length > 0) {
+          if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
             if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = [];
             const displayLine = remainingText.replace(/^[-•*]?\s*/, '');
             result.nextWeek[currentProject].push(`${displayLine} (${r.name.split(' ')[0]})`);
