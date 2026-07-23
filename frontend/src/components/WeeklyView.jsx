@@ -63,7 +63,7 @@ export default function WeeklyView({ reports, fetchReports }) {
         let currentMinor = '';
         
         lines.forEach(line => {
-          const match = line.match(/\[(.*?)\]/);
+          const match = line.match(/^\[(.*?)\]/);
           if (match) {
             const std = standardizeProjectName(match[1]);
             if (std.includes(' - ')) {

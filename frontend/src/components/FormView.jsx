@@ -38,6 +38,22 @@ export default function FormView({ onReportAdded }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
   const [activeMajor, setActiveMajor] = useState(TAXONOMY[0].major);
+  const [activeField, setActiveField] = useState('thisWeekTask');
+  const [lastMajor, setLastMajor] = useState({ thisWeekTask: null, nextWeekTask: null });
+
+  const appendTag = (major, minor) => {
+    const isSameMajor = lastMajor[activeField] === major;
+    const prefix = isSameMajor ? '\n' : `\n\n[${major}]\n`;
+    const tag = `${prefix}- [${minor}] `;
+    
+    if (activeField === 'thisWeekTask') {
+      setThisWeekTask(prev => (prev ? prev.trimEnd() : '') + tag);
+    } else {
+      setNextWeekTask(prev => (prev ? prev.trimEnd() : '') + tag);
+    }
+    
+    setLastMajor(prev => ({ ...prev, [activeField]: major }));
+  };
 
   // Past History Load
   const [showHistory, setShowHistory] = useState(false);
@@ -192,10 +208,7 @@ export default function FormView({ onReportAdded }) {
                 <button 
                   key={minor}
                   type="button"
-                  onClick={() => {
-                    const tag = `[${activeMajor} - ${minor}]`;
-                    setThisWeekTask(prev => prev + (prev ? '\n\n' : '') + tag + '\n- ');
-                  }}
+                  onClick={() => appendTag(activeMajor, minor)}
                   style={{ 
                     backgroundColor: '#f8fafc', border: '1px solid #22c55e', color: '#15803d',
                     padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem',
@@ -213,8 +226,7 @@ export default function FormView({ onReportAdded }) {
                   onClick={() => {
                     const customText = window.prompt(TAXONOMY.find(c => c.major === activeMajor).customPrompt);
                     if (customText && customText.trim()) {
-                      const tag = `[${activeMajor} - ${customText.trim()}]`;
-                      setThisWeekTask(prev => prev + (prev ? '\n\n' : '') + tag + '\n- ');
+                      appendTag(activeMajor, customText.trim());
                     }
                   }}
                   style={{ 
@@ -290,30 +302,34 @@ export default function FormView({ onReportAdded }) {
           <div className="form-group" style={{ marginTop: '2rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1e40af' }}>
               <Check size={18} /> 금주 진행 업무
+              {activeField === 'thisWeekTask' && <span style={{ fontSize: '0.8rem', color: '#2563eb', fontWeight: 'normal', marginLeft: 'auto' }}>✏️ 현재 태그 입력 중</span>}
             </label>
             <textarea 
               className="form-control" 
-              placeholder="예)&#10;[AM 제조/서비스 - 우나스텔라]&#10;- 출력물 서포트 제거&#10;&#10;[설비 운용 및 관리 - A40PM3SN01(BLT-S400-3)]&#10;- 필터 교체"
+              placeholder="예)&#10;[AM 제조/서비스]&#10;- [우나스텔라] 출력물 서포트 제거&#10;- [LG전자] 납품 확인"
               value={thisWeekTask}
               onChange={(e) => setThisWeekTask(e.target.value)}
+              onFocus={() => setActiveField('thisWeekTask')}
               onKeyDown={handleTextareaKeyDown}
               onPaste={handleTextareaPaste}
-              style={{ minHeight: '180px', borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }}
+              style={{ minHeight: '180px', borderColor: activeField === 'thisWeekTask' ? '#3b82f6' : '#bfdbfe', backgroundColor: '#eff6ff', borderWidth: activeField === 'thisWeekTask' ? '2px' : '1px' }}
             />
           </div>
 
           <div className="form-group" style={{ marginTop: '2rem' }}>
             <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#047857' }}>
               <ChevronRight size={18} /> 차주 업무 계획
+              {activeField === 'nextWeekTask' && <span style={{ fontSize: '0.8rem', color: '#059669', fontWeight: 'normal', marginLeft: 'auto' }}>✏️ 현재 태그 입력 중</span>}
             </label>
             <textarea 
               className="form-control" 
-              placeholder="예)&#10;[AM 제조/서비스 - 우나스텔라]&#10;- 4/30일 우나스텔라 기술미팅 예정&#10;&#10;[후공정 및 검사 - 품질검사]&#10;- 공인시험 접수 예정"
+              placeholder="예)&#10;[설비 운용 및 관리]&#10;- [A40PM3SN01(BLT-S400-3)] 필터 교체"
               value={nextWeekTask}
               onChange={(e) => setNextWeekTask(e.target.value)}
+              onFocus={() => setActiveField('nextWeekTask')}
               onKeyDown={handleTextareaKeyDown}
               onPaste={handleTextareaPaste}
-              style={{ minHeight: '180px', borderColor: '#a7f3d0', backgroundColor: '#ecfdf5' }}
+              style={{ minHeight: '180px', borderColor: activeField === 'nextWeekTask' ? '#10b981' : '#a7f3d0', backgroundColor: '#ecfdf5', borderWidth: activeField === 'nextWeekTask' ? '2px' : '1px' }}
             />
           </div>
 
