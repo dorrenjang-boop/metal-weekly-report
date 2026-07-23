@@ -26,6 +26,10 @@ export const PROJECT_KEYWORDS = [
 // 프로젝트명 표준화 함수
 export const standardizeProjectName = (tag) => {
   if (!tag) return '공통/기타';
+  
+  // 신규 대분류-중분류 체계 태그는 있는 그대로 반환
+  if (tag.includes(' - ')) return tag.trim();
+
   const t = tag.toUpperCase();
   if (t.includes('EOS') || t.includes('M290')) return 'EOS M290';
   if (t.includes('A40') || t.includes('A40PM')) return 'A40PM';

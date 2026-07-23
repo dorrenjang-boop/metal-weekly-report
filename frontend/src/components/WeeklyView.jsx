@@ -1,16 +1,6 @@
 import React, { useMemo, useState } from 'react';
-import { getWeekString } from '../utils/analyze';
+import { getWeekString, standardizeProjectName } from '../utils/analyze';
 import { Calendar, User, Check, ChevronRight, Trash2, FolderKanban, Users, Pencil, Save, X } from 'lucide-react';
-
-// 프로젝트명 표준화 함수
-const standardizeProjectName = (tag) => {
-  if (!tag) return '공통/기타';
-  const t = tag.toUpperCase();
-  if (t.includes('EOS') || t.includes('M290')) return 'EOS M290';
-  if (t.includes('A40') || t.includes('A40PM')) return 'A40PM';
-  if (t.includes('A65') || t.includes('A65PM')) return 'A65PM';
-  return tag.trim();
-};
 
 // "해당 없음" 필터링 및 텍스트 정리 함수
 const processTaskText = (text) => {

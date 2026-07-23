@@ -2,6 +2,34 @@ import React, { useState } from 'react';
 import { extractKeywords } from '../utils/analyze';
 import { Send, History, CheckCircle, ChevronRight, Check } from 'lucide-react';
 
+const TAXONOMY = [
+  {
+    major: "AM 제조/서비스",
+    minors: ["우나스텔라", "LG전자", "기타(단발성)"],
+    customPrompt: "신규 고객사명을 입력하세요 (예: 삼성전자):"
+  },
+  {
+    major: "설비 운용 및 관리",
+    minors: ["A40PM3SN01(BLT-S400-3)", "A40PM3SN02(BLT-S400-3)", "A40PM4SN01(EOS M400-4)", "A29PM1SN01(EOS M290-1)", "A65PM8SN01(BLT S600-8)", "A65PM8SN02(BLT S600-8)", "A40PM6SN01(LiM X400-6)", "A15PM1SN01(LiM X150-1)"],
+    customPrompt: "신규 설비명을 입력하세요:"
+  },
+  {
+    major: "후공정 및 검사",
+    minors: ["절삭가공", "열처리", "와이어 방전가공", "품질검사"],
+    customPrompt: "신규 공정명을 입력하세요:"
+  },
+  {
+    major: "기술개발 및 실증",
+    minors: ["공정최적화", "불량원인분석", "소재물성평가", "공정환경평가"],
+    customPrompt: null
+  },
+  {
+    major: "센터 운영 및 기타",
+    minors: ["원자재/부자재관리", "근태(휴가)", "기타업무"],
+    customPrompt: "신규 항목을 입력하세요:"
+  }
+];
+
 export default function FormView({ onReportAdded }) {
   const [name, setName] = useState('');
   const [thisWeekTask, setThisWeekTask] = useState('');
@@ -9,6 +37,7 @@ export default function FormView({ onReportAdded }) {
   const [imageFile, setImageFile] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [success, setSuccess] = useState(false);
+  const [activeMajor, setActiveMajor] = useState(TAXONOMY[0].major);
 
   // Past History Load
   const [showHistory, setShowHistory] = useState(false);
@@ -35,11 +64,26 @@ export default function FormView({ onReportAdded }) {
   const applyPastReport = (report) => {
     // Bring past 'nextWeekTask' to current 'thisWeekTask' if available, otherwise just use their past thisWeekTask
     if (report.nextWeekTask && report.nextWeekTask.trim().length > 0) {
-      setThisWeekTask(report.nextWeekTask + '\n\n[지난주 예정사항에서 가져옴. 진행 내역으로 수정해주세요.]');
+      setThisWeekTask(report.nextWeekTask + '\n\n[지난주 예정사항에서 가져옴 - 진행 내역으로 수정해주세요.]\n- ');
     } else {
       setThisWeekTask(report.thisWeekTask);
     }
     setShowHistory(false);
+  };
+
+  const handleTextareaKeyDown = (e) => {
+    if (e.key === '[') {
+      e.preventDefault();
+      alert('⚠️ 프로젝트 태그(대괄호 [ ])는 직접 입력할 수 없습니다. 상단의 대분류/중분류 버튼을 클릭해서 추가해주세요!');
+    }
+  };
+
+  const handleTextareaPaste = (e) => {
+    const paste = (e.clipboardData || window.clipboardData).getData('text');
+    if (paste.includes('[')) {
+      e.preventDefault();
+      alert('⚠️ 복사한 내용에 대괄호([ ])가 포함되어 있어 붙여넣을 수 없습니다. 대괄호를 지우고 다시 시도해주세요.');
+    }
   };
 
   const handleSubmit = async (e) => {
@@ -117,27 +161,73 @@ export default function FormView({ onReportAdded }) {
       <div className="page-header" style={{ textAlign: 'center', marginBottom: '3rem' }}>
         <h2>주간 업무 작성</h2>
         <p>복잡한 양식 없이 금주 진행 사항과 차주 계획을 나열식으로 편하게 작성하세요.</p>
-        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', color: '#166534', padding: '1rem', borderRadius: '8px', marginTop: '1rem', fontWeight: 'bold', display: 'inline-block', textAlign: 'left' }}>
+        <div style={{ backgroundColor: '#f0fdf4', border: '1px solid #86efac', color: '#166534', padding: '1rem', borderRadius: '8px', marginTop: '1rem', fontWeight: 'bold', display: 'inline-block', textAlign: 'left', width: '100%' }}>
           💡 [스마트 작성 규칙]<br/>
-          매번 대괄호를 직접 칠 필요 없이 아래 버튼을 클릭하면 빠르게 태그가 삽입됩니다!<br/>
-          그 아래에 적는 모든 내용은 다음 대괄호가 나오기 전까지 해당 프로젝트로 자동 묶음 처리됩니다.
+          이제부터 <b>임의의 프로젝트 태그 직접 입력은 금지</b>됩니다! (대괄호 [ ] 타이핑 불가)<br/>
+          아래의 대분류 탭을 누르시고, 원하시는 중분류 버튼을 클릭하여 태그를 삽입해 주세요.
           
-          <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap', marginTop: '1rem' }}>
-            {['[EOS M290]', '[A40PM]', '[A65PM]', '[LIG]', '[연구개발]', '[공통]'].map(tag => (
-              <button 
-                key={tag}
-                type="button"
-                onClick={() => {
-                  setThisWeekTask(prev => prev + (prev ? '\n\n' : '') + tag + '\n- ');
-                }}
-                style={{ 
-                  backgroundColor: '#fff', border: '1px solid #22c55e', color: '#15803d',
-                  padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem'
-                }}
-              >
-                + {tag}
-              </button>
-            ))}
+          <div style={{ marginTop: '1rem', border: '1px solid #22c55e', borderRadius: '8px', overflow: 'hidden' }}>
+            <div style={{ display: 'flex', backgroundColor: '#dcfce7', borderBottom: '1px solid #22c55e', flexWrap: 'wrap' }}>
+              {TAXONOMY.map(cat => (
+                <button
+                  key={cat.major}
+                  type="button"
+                  onClick={() => setActiveMajor(cat.major)}
+                  style={{
+                    flex: '1 1 20%', padding: '0.6rem 0.2rem', border: 'none', borderRight: '1px solid #22c55e', borderBottom: 'none',
+                    backgroundColor: activeMajor === cat.major ? '#22c55e' : 'transparent',
+                    color: activeMajor === cat.major ? '#fff' : '#166534',
+                    fontWeight: activeMajor === cat.major ? 'bold' : 'normal',
+                    cursor: 'pointer', fontSize: '0.85rem',
+                    transition: 'background-color 0.2s',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  {cat.major}
+                </button>
+              ))}
+            </div>
+            <div style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+              {TAXONOMY.find(c => c.major === activeMajor)?.minors.map(minor => (
+                <button 
+                  key={minor}
+                  type="button"
+                  onClick={() => {
+                    const tag = `[${activeMajor} - ${minor}]`;
+                    setThisWeekTask(prev => prev + (prev ? '\n\n' : '') + tag + '\n- ');
+                  }}
+                  style={{ 
+                    backgroundColor: '#f8fafc', border: '1px solid #22c55e', color: '#15803d',
+                    padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem',
+                    transition: 'all 0.2s'
+                  }}
+                  onMouseOver={(e) => { e.target.style.backgroundColor = '#dcfce7'; }}
+                  onMouseOut={(e) => { e.target.style.backgroundColor = '#f8fafc'; }}
+                >
+                  + {minor}
+                </button>
+              ))}
+              {TAXONOMY.find(c => c.major === activeMajor)?.customPrompt && (
+                <button 
+                  type="button"
+                  onClick={() => {
+                    const customText = window.prompt(TAXONOMY.find(c => c.major === activeMajor).customPrompt);
+                    if (customText && customText.trim()) {
+                      const tag = `[${activeMajor} - ${customText.trim()}]`;
+                      setThisWeekTask(prev => prev + (prev ? '\n\n' : '') + tag + '\n- ');
+                    }
+                  }}
+                  style={{ 
+                    backgroundColor: '#fff', border: '1px dashed #22c55e', color: '#15803d',
+                    padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem'
+                  }}
+                  onMouseOver={(e) => { e.target.style.backgroundColor = '#dcfce7'; }}
+                  onMouseOut={(e) => { e.target.style.backgroundColor = '#fff'; }}
+                >
+                  + 직접 입력 (신규 추가)
+                </button>
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -203,9 +293,11 @@ export default function FormView({ onReportAdded }) {
             </label>
             <textarea 
               className="form-control" 
-              placeholder="예)&#10;[공통]&#10;- 알루미늄 분말 구매&#10;&#10;[LIG]&#10;- EOS M290 프린팅 진행 검토&#10;&#10;[연구개발]&#10;- 구리 공정변수 열처리 접수"
+              placeholder="예)&#10;[AM 제조/서비스 - 우나스텔라]&#10;- 출력물 서포트 제거&#10;&#10;[설비 운용 및 관리 - A40PM3SN01(BLT-S400-3)]&#10;- 필터 교체"
               value={thisWeekTask}
               onChange={(e) => setThisWeekTask(e.target.value)}
+              onKeyDown={handleTextareaKeyDown}
+              onPaste={handleTextareaPaste}
               style={{ minHeight: '180px', borderColor: '#bfdbfe', backgroundColor: '#eff6ff' }}
             />
           </div>
@@ -216,9 +308,11 @@ export default function FormView({ onReportAdded }) {
             </label>
             <textarea 
               className="form-control" 
-              placeholder="예)&#10;[풍산]&#10;- 4/30일 풍산과 기술미팅 예정&#10;&#10;[Limlaser]&#10;- 공인시험 접수 예정"
+              placeholder="예)&#10;[AM 제조/서비스 - 우나스텔라]&#10;- 4/30일 우나스텔라 기술미팅 예정&#10;&#10;[후공정 및 검사 - 품질검사]&#10;- 공인시험 접수 예정"
               value={nextWeekTask}
               onChange={(e) => setNextWeekTask(e.target.value)}
+              onKeyDown={handleTextareaKeyDown}
+              onPaste={handleTextareaPaste}
               style={{ minHeight: '180px', borderColor: '#a7f3d0', backgroundColor: '#ecfdf5' }}
             />
           </div>
