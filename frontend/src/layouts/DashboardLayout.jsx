@@ -21,12 +21,12 @@ const SidebarItem = ({ to, icon: Icon, label }) => (
 
 const DashboardLayout = () => {
   return (
-    <div className="flex h-screen overflow-hidden bg-[var(--bg-color)] print:h-auto print:overflow-visible">
+    <div className="app-container flex h-screen overflow-hidden bg-[var(--bg-color)]">
       {/* Sidebar */}
       <motion.aside 
         initial={{ x: -250 }}
         animate={{ x: 0 }}
-        className="w-64 glass-panel border-y-0 border-l-0 rounded-none h-full flex flex-col relative z-20 print:hidden"
+        className="print-hide w-64 glass-panel border-y-0 border-l-0 rounded-none h-full flex flex-col relative z-20"
       >
         <div className="p-6">
           <h1 className="text-2xl font-bold text-gray-800">
@@ -46,9 +46,9 @@ const DashboardLayout = () => {
       </motion.aside>
 
       {/* Main Content */}
-      <main className="flex-1 overflow-y-auto relative z-10 print:overflow-visible">
+      <main className="main-content flex-1 overflow-y-auto relative z-10">
         {/* Header */}
-        <header className="bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm print:hidden">
+        <header className="print-hide bg-white border-b border-gray-200 px-8 py-4 sticky top-0 z-30 flex justify-between items-center shadow-sm">
           <h2 className="text-lg font-medium text-gray-800">Overview</h2>
           <div className="flex items-center gap-4">
             <div className="w-9 h-9 rounded-full bg-blue-600 flex items-center justify-center text-sm font-bold text-white shadow-sm">
@@ -63,7 +63,6 @@ const DashboardLayout = () => {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4 }}
-            className="print:translate-y-0 print:opacity-100"
           >
             <Outlet />
           </motion.div>

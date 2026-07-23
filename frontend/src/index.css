@@ -358,6 +358,8 @@ textarea.form-control {
     background-color: white !important;
     height: auto !important;
     overflow: visible !important;
+    display: block !important;
+    width: 100% !important;
   }
   .report-wrapper {
     background-color: white !important;
