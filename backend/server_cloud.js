@@ -81,13 +81,13 @@ app.post('/api/upload', upload.single('image'), async (req, res) => {
   blobStream.end(req.file.buffer);
 });
 
-// Local Mock for Reports to prevent Firestore crashes locally
-let mockReports = [];
-
 app.get('/api/reports', async (req, res) => {
   try {
-    res.json(mockReports);
+    const snapshot = await reportsCollection.orderBy('date', 'desc').get();
+    const reports = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+    res.json(reports);
   } catch (err) {
+    console.error('Firestore GET error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
@@ -96,32 +96,46 @@ app.post('/api/reports', async (req, res) => {
   try {
     const newReport = req.body;
     const id = Date.now().toString();
-    mockReports.push({ id, ...newReport });
+    
+    await reportsCollection.doc(id).set({
+      date: newReport.date,
+      name: newReport.name,
+      thisWeekTask: newReport.thisWeekTask || '',
+      nextWeekTask: newReport.nextWeekTask || '',
+      project: newReport.project || '',
+      printer: newReport.printer || '',
+      keywords: newReport.keywords || '',
+      imagePath: newReport.imagePath || ''
+    });
+
     res.json({ message: 'Success', id });
   } catch (err) {
+    console.error('Firestore POST error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
 app.delete('/api/reports/:id', async (req, res) => {
   try {
-    mockReports = mockReports.filter(r => r.id !== req.params.id);
+    await reportsCollection.doc(req.params.id).delete();
     res.json({ message: 'Deleted successfully' });
   } catch (err) {
+    console.error('Firestore DELETE error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
 
 app.put('/api/reports/:id', async (req, res) => {
   try {
-    const index = mockReports.findIndex(r => r.id === req.params.id);
-    if (index !== -1) {
-      mockReports[index] = { ...mockReports[index], ...req.body };
-      res.json({ message: 'Updated successfully' });
-    } else {
-      res.status(404).json({ error: 'Not found' });
-    }
+    const id = req.params.id;
+    const { thisWeekTask, nextWeekTask } = req.body;
+    await reportsCollection.doc(id).update({
+      thisWeekTask: thisWeekTask || '',
+      nextWeekTask: nextWeekTask || ''
+    });
+    res.json({ message: 'Updated successfully' });
   } catch (err) {
+    console.error('Firestore PUT error:', err);
     res.status(500).json({ error: 'Database error' });
   }
 });
