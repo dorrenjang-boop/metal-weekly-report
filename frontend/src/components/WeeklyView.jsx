@@ -343,7 +343,16 @@ export default function WeeklyView({ reports, fetchReports }) {
                               {proj.thisWeek.map((task, tIdx) => (
                                 <li key={tIdx} style={{ marginBottom: '0.25rem' }}>
                                   <span style={{ fontWeight: 600, marginRight: '0.4rem', color: '#64748b' }}>[{task.user}]</span>
-                                  {task.text}
+                                  {task.text.match(/^\[(.*?)\]/) ? (
+                                    <>
+                                      <span style={{ fontWeight: 600, color: '#0f766e', marginRight: '0.25rem' }}>
+                                        {task.text.match(/^\[(.*?)\]/)[0]}
+                                      </span>
+                                      {task.text.replace(/^\[(.*?)\]\s*/, '')}
+                                    </>
+                                  ) : (
+                                    task.text
+                                  )}
                                 </li>
                               ))}
                             </ul>
@@ -359,7 +368,16 @@ export default function WeeklyView({ reports, fetchReports }) {
                               {proj.nextWeek.map((task, tIdx) => (
                                 <li key={tIdx} style={{ marginBottom: '0.25rem' }}>
                                   <span style={{ fontWeight: 600, marginRight: '0.4rem', color: '#64748b' }}>[{task.user}]</span>
-                                  {task.text}
+                                  {task.text.match(/^\[(.*?)\]/) ? (
+                                    <>
+                                      <span style={{ fontWeight: 600, color: '#0f766e', marginRight: '0.25rem' }}>
+                                        {task.text.match(/^\[(.*?)\]/)[0]}
+                                      </span>
+                                      {task.text.replace(/^\[(.*?)\]\s*/, '')}
+                                    </>
+                                  ) : (
+                                    task.text
+                                  )}
                                 </li>
                               ))}
                             </ul>

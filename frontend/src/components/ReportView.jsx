@@ -18,27 +18,43 @@ export default function ReportView({ reports }) {
   };
 
   const renderSectionContent = (dataObj, projectsArray) => {
-    const activeProjects = projectsArray.filter(proj => dataObj[proj] && dataObj[proj].length > 0);
+    // For nested dataObj: { "AM 제조/서비스": { "우나스텔라": ["task1"], "": ["legacy task"] } }
+    const activeProjects = projectsArray.filter(proj => {
+      const minors = dataObj[proj];
+      if (!minors) return false;
+      return Object.values(minors).some(tasks => tasks.length > 0);
+    });
 
     if (activeProjects.length === 0) {
       return <div style={{ color: '#64748b', paddingLeft: '1rem' }}>해당 내역이 없습니다.</div>;
     }
 
     return activeProjects.map((proj, idx) => {
-      const items = dataObj[proj];
+      const minorsObj = dataObj[proj];
       return (
         <div key={proj} style={{ marginBottom: '1.25rem' }}>
           <h3 style={{ fontSize: '1.05rem', fontWeight: 700, marginBottom: '0.4rem', borderBottom: '1px dashed #cbd5e1', paddingBottom: '0.2rem' }}>
             {idx + 1}. {proj}
           </h3>
-          <ul style={{ listStyleType: 'none', paddingLeft: '1rem', margin: 0 }}>
-            {items.map((line, i) => (
-              <li key={i} style={{ fontSize: '0.95rem', lineHeight: '1.7', marginBottom: '0.2rem', position: 'relative' }}>
-                <span style={{ position: 'absolute', left: '-1rem' }}>-</span>
-                {line}
-              </li>
-            ))}
-          </ul>
+          <div style={{ paddingLeft: '0.5rem' }}>
+            {Object.keys(minorsObj).map(minor => {
+              const tasks = minorsObj[minor];
+              if (!tasks || tasks.length === 0) return null;
+              return (
+                <div key={minor} style={{ marginBottom: '0.5rem' }}>
+                  {minor && <div style={{ fontWeight: 'bold', fontSize: '0.95rem', color: '#334155', marginBottom: '0.2rem' }}>[{minor}]</div>}
+                  <ul style={{ listStyleType: 'none', paddingLeft: minor ? '1rem' : '0.5rem', margin: 0 }}>
+                    {tasks.map((line, i) => (
+                      <li key={i} style={{ fontSize: '0.95rem', lineHeight: '1.7', marginBottom: '0.2rem', position: 'relative' }}>
+                        <span style={{ position: 'absolute', left: '-1rem' }}>-</span>
+                        {line}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              );
+            })}
+          </div>
         </div>
       );
     });

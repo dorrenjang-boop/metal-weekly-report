@@ -134,16 +134,30 @@ export function generatePrintableReport(reports) {
 
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
           if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
-            if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = [];
-            const displayLine = remainingText.replace(/^[-•*]?\s*/, '');
-            const prefix = currentMinor ? `[${currentMinor}] ` : '';
-            result.thisWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
+            if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = {};
+            
+            let displayLine = remainingText.replace(/^[-•*]?\s*/, '');
+            let lineMinor = currentMinor;
+            const minorMatch = displayLine.match(/^\[(.*?)\]/);
+            if (minorMatch) {
+              lineMinor = minorMatch[1].trim();
+              displayLine = displayLine.replace(/^\[.*?\]\s*/, '').trim();
+            }
+            if (!result.thisWeek[currentProject][lineMinor]) result.thisWeek[currentProject][lineMinor] = [];
+            result.thisWeek[currentProject][lineMinor].push(`${displayLine} (${r.name.split(' ')[0]})`);
           }
         } else {
-          if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = [];
-          const displayLine = cleanLine.replace(/^[-•*]?\s*/, '');
-          const prefix = currentMinor ? `[${currentMinor}] ` : '';
-          result.thisWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
+          if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = {};
+          
+          let displayLine = cleanLine.replace(/^[-•*]?\s*/, '');
+          let lineMinor = currentMinor;
+          const minorMatch = displayLine.match(/^\[(.*?)\]/);
+          if (minorMatch) {
+            lineMinor = minorMatch[1].trim();
+            displayLine = displayLine.replace(/^\[.*?\]\s*/, '').trim();
+          }
+          if (!result.thisWeek[currentProject][lineMinor]) result.thisWeek[currentProject][lineMinor] = [];
+          result.thisWeek[currentProject][lineMinor].push(`${displayLine} (${r.name.split(' ')[0]})`);
         }
       });
     }
@@ -174,16 +188,30 @@ export function generatePrintableReport(reports) {
 
           const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
           if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
-            if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = [];
-            const displayLine = remainingText.replace(/^[-•*]?\s*/, '');
-            const prefix = currentMinor ? `[${currentMinor}] ` : '';
-            result.nextWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
+            if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = {};
+            
+            let displayLine = remainingText.replace(/^[-•*]?\s*/, '');
+            let lineMinor = currentMinor;
+            const minorMatch = displayLine.match(/^\[(.*?)\]/);
+            if (minorMatch) {
+              lineMinor = minorMatch[1].trim();
+              displayLine = displayLine.replace(/^\[.*?\]\s*/, '').trim();
+            }
+            if (!result.nextWeek[currentProject][lineMinor]) result.nextWeek[currentProject][lineMinor] = [];
+            result.nextWeek[currentProject][lineMinor].push(`${displayLine} (${r.name.split(' ')[0]})`);
           }
         } else {
-          if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = [];
-          const displayLine = cleanLine.replace(/^[-•*]?\s*/, '');
-          const prefix = currentMinor ? `[${currentMinor}] ` : '';
-          result.nextWeek[currentProject].push(`${prefix}${displayLine} (${r.name.split(' ')[0]})`);
+          if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = {};
+          
+          let displayLine = cleanLine.replace(/^[-•*]?\s*/, '');
+          let lineMinor = currentMinor;
+          const minorMatch = displayLine.match(/^\[(.*?)\]/);
+          if (minorMatch) {
+            lineMinor = minorMatch[1].trim();
+            displayLine = displayLine.replace(/^\[.*?\]\s*/, '').trim();
+          }
+          if (!result.nextWeek[currentProject][lineMinor]) result.nextWeek[currentProject][lineMinor] = [];
+          result.nextWeek[currentProject][lineMinor].push(`${displayLine} (${r.name.split(' ')[0]})`);
         }
       });
     }
