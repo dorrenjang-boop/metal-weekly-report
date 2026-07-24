@@ -104,11 +104,12 @@ export default function WeeklyView({ reports, fetchReports }) {
           if (cleanText || (!rawTag && cleanLine)) {
             if (!rawTag) cleanText = cleanLine.replace(/^[\s\-\*]+/, '').trim();
             if (cleanText) {
-            const textToPush = currentMinor ? `[${currentMinor}] ${cleanText}` : cleanText;
-            projects[currentProject][taskType === 'thisWeekTask' ? 'thisWeek' : 'nextWeek'].push({
-              user: report.name,
-              text: textToPush
-            });
+              const textToPush = currentMinor ? `[${currentMinor}] ${cleanText}` : cleanText;
+              projects[currentProject][taskType === 'thisWeekTask' ? 'thisWeek' : 'nextWeek'].push({
+                user: report.name,
+                text: textToPush
+              });
+            }
           }
         });
       });
