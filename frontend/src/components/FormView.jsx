@@ -16,6 +16,24 @@ export default function FormView({ onReportAdded }) {
     thisWeekTask: { major: null, minor: null }, 
     nextWeekTask: { major: null, minor: null } 
   });
+  const [customMinors, setCustomMinors] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('customMinors') || '{}');
+    } catch {
+      return {};
+    }
+  });
+
+  const getNextMajorNumber = (text) => {
+    if (!text) return 1;
+    let count = 0;
+    const lines = text.split('\n');
+    lines.forEach(l => {
+      const clean = l.replace(/^\d+\.\s*/, '').trim();
+      if (TAXONOMY.some(t => t.major === clean)) count++;
+    });
+    return count + 1;
+  };
 
   const appendTag = (major, minor) => {
     const state = lastState[activeField];
@@ -25,7 +43,8 @@ export default function FormView({ onReportAdded }) {
     let textToAppend = '';
 
     if (state.major !== major) {
-       textToAppend += (isFirst ? '' : '\n\n') + `[${major}]\n[${minor}]\n- `;
+       const nextNum = getNextMajorNumber(prevText);
+       textToAppend += (isFirst ? '' : '\n\n') + `${nextNum}. ${major}\n[${minor}]\n- `;
     } else if (state.minor !== minor) {
        textToAppend += (isFirst ? '' : '\n\n') + `[${minor}]\n- `;
     } else {
@@ -192,42 +211,66 @@ export default function FormView({ onReportAdded }) {
                 </button>
               ))}
             </div>
-            <div style={{ padding: '1rem', backgroundColor: '#fff', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
-              {TAXONOMY.find(c => c.major === activeMajor)?.minors.map(minor => (
-                <button 
-                  key={minor}
-                  type="button"
-                  onClick={() => appendTag(activeMajor, minor)}
-                  style={{ 
-                    backgroundColor: '#f8fafc', border: '1px solid #22c55e', color: '#15803d',
-                    padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem',
-                    transition: 'all 0.2s'
-                  }}
-                  onMouseOver={(e) => { e.target.style.backgroundColor = '#dcfce7'; }}
-                  onMouseOut={(e) => { e.target.style.backgroundColor = '#f8fafc'; }}
-                >
-                  + {minor}
-                </button>
-              ))}
-              {TAXONOMY.find(c => c.major === activeMajor)?.customPrompt && (
-                <button 
-                  type="button"
-                  onClick={() => {
-                    const customText = window.prompt(TAXONOMY.find(c => c.major === activeMajor).customPrompt);
-                    if (customText && customText.trim()) {
-                      appendTag(activeMajor, customText.trim());
-                    }
-                  }}
-                  style={{ 
-                    backgroundColor: '#fff', border: '1px dashed #22c55e', color: '#15803d',
-                    padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem'
-                  }}
-                  onMouseOver={(e) => { e.target.style.backgroundColor = '#dcfce7'; }}
-                  onMouseOut={(e) => { e.target.style.backgroundColor = '#fff'; }}
-                >
-                  + 직접 입력 (신규 추가)
-                </button>
-              )}
+            <div style={{ padding: '1rem', backgroundColor: '#fff' }}>
+              {(() => {
+                const category = TAXONOMY.find(c => c.major === activeMajor);
+                if (!category) return null;
+                const combinedMinors = [...category.minors, ...(customMinors[category.major] || [])];
+                return (
+                  <>
+                    {category.description && (
+                      <div style={{ marginBottom: '1rem', paddingBottom: '0.75rem', borderBottom: '1px dashed #cbd5e1', color: '#0f172a', fontSize: '0.9rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                        <span style={{ backgroundColor: '#e2e8f0', padding: '0.2rem 0.5rem', borderRadius: '4px', fontSize: '0.8rem', fontWeight: 'bold', color: '#334155' }}>안내</span>
+                        {category.description}
+                      </div>
+                    )}
+                    <div style={{ display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }}>
+                      {combinedMinors.map(minor => (
+                      <button 
+                        key={minor}
+                        type="button"
+                        onClick={() => appendTag(activeMajor, minor)}
+                        style={{ 
+                          backgroundColor: '#f8fafc', border: '1px solid #22c55e', color: '#15803d',
+                          padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem',
+                          transition: 'all 0.2s'
+                        }}
+                        onMouseOver={(e) => { e.target.style.backgroundColor = '#dcfce7'; }}
+                        onMouseOut={(e) => { e.target.style.backgroundColor = '#f8fafc'; }}
+                      >
+                        + {minor}
+                      </button>
+                    ))}
+                    {category.customPrompt && (
+                      <button 
+                        type="button"
+                        onClick={() => {
+                          const val = window.prompt(category.customPrompt);
+                          if (val && val.trim()) {
+                            const newCustom = { ...customMinors };
+                            if (!newCustom[category.major]) newCustom[category.major] = [];
+                            if (!newCustom[category.major].includes(val.trim())) {
+                              newCustom[category.major].push(val.trim());
+                              localStorage.setItem('customMinors', JSON.stringify(newCustom));
+                              setCustomMinors(newCustom);
+                            }
+                            appendTag(activeMajor, val.trim());
+                          }
+                        }}
+                        style={{ 
+                          backgroundColor: '#fff', border: '1px dashed #22c55e', color: '#15803d',
+                          padding: '0.4rem 0.8rem', borderRadius: '20px', cursor: 'pointer', fontSize: '0.85rem'
+                        }}
+                        onMouseOver={(e) => { e.target.style.backgroundColor = '#dcfce7'; }}
+                        onMouseOut={(e) => { e.target.style.backgroundColor = '#fff'; }}
+                      >
+                        + 직접 입력 (신규 추가)
+                      </button>
+                    )}
+                    </div>
+                  </>
+                );
+              })()}
             </div>
           </div>
         </div>
@@ -295,7 +338,7 @@ export default function FormView({ onReportAdded }) {
             </label>
             <textarea 
               className="form-control" 
-              placeholder="예)&#10;[AM 제조/서비스]&#10;- [우나스텔라] 출력물 서포트 제거&#10;- [LG전자] 납품 확인"
+              placeholder="예)&#10;1. AM 제조/서비스&#10;[우나스텔라]&#10;- 출력물 서포트 제거&#10;[LG전자]&#10;- 납품 확인"
               value={thisWeekTask}
               onChange={(e) => setThisWeekTask(e.target.value)}
               onFocus={() => setActiveField('thisWeekTask')}
@@ -312,7 +355,7 @@ export default function FormView({ onReportAdded }) {
             </label>
             <textarea 
               className="form-control" 
-              placeholder="예)&#10;[설비 운용 및 관리]&#10;- [A40PM3SN01(BLT-S400-3)] 필터 교체"
+              placeholder="예)&#10;1. 설비 운용 및 관리&#10;[A40PM3SN01(BLT-S400-3)]&#10;- 필터 교체"
               value={nextWeekTask}
               onChange={(e) => setNextWeekTask(e.target.value)}
               onFocus={() => setActiveField('nextWeekTask')}

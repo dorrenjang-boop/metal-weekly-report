@@ -121,9 +121,18 @@ export function generatePrintableReport(reports) {
         const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
         if (cleanLine.length === 0) return;
 
+        let rawTag = null;
+        let isBracketTag = false;
         const match = cleanLine.match(/^\[(.*?)\]/);
+        
         if (match) {
-          const rawTag = match[1].replace(/^\[+/, '').trim();
+          rawTag = match[1].replace(/^\[+/, '').trim();
+          isBracketTag = true;
+        } else if (isMajorTag(standardizeProjectName(cleanLine))) {
+          rawTag = cleanLine;
+        }
+
+        if (rawTag) {
           const std = standardizeProjectName(rawTag);
           if (std.includes(' - ')) {
             const parts = std.split(' - ');
@@ -141,7 +150,7 @@ export function generatePrintableReport(reports) {
             }
           }
 
-          const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
+          const remainingText = isBracketTag ? cleanLine.replace(/^\[.*?\]\s*/, '').trim() : '';
           if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
             if (!result.thisWeek[currentProject]) result.thisWeek[currentProject] = {};
             
@@ -182,9 +191,18 @@ export function generatePrintableReport(reports) {
         const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
         if (cleanLine.length === 0) return;
 
+        let rawTag = null;
+        let isBracketTag = false;
         const match = cleanLine.match(/^\[(.*?)\]/);
+        
         if (match) {
-          const rawTag = match[1].replace(/^\[+/, '').trim();
+          rawTag = match[1].replace(/^\[+/, '').trim();
+          isBracketTag = true;
+        } else if (isMajorTag(standardizeProjectName(cleanLine))) {
+          rawTag = cleanLine;
+        }
+
+        if (rawTag) {
           const std = standardizeProjectName(rawTag);
           if (std.includes(' - ')) {
             const parts = std.split(' - ');
@@ -202,7 +220,7 @@ export function generatePrintableReport(reports) {
             }
           }
 
-          const remainingText = cleanLine.replace(/^\[.*?\]\s*/, '').trim();
+          const remainingText = isBracketTag ? cleanLine.replace(/^\[.*?\]\s*/, '').trim() : '';
           if (remainingText.length > 0 && !isNoOpLine(remainingText)) {
             if (!result.nextWeek[currentProject]) result.nextWeek[currentProject] = {};
             

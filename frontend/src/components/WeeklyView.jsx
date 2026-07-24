@@ -64,9 +64,20 @@ export default function WeeklyView({ reports, fetchReports }) {
         let currentMinor = '';
         
         lines.forEach(line => {
-          const match = line.match(/^\[(.*?)\]/);
+          const cleanLine = line.replace(/^\d+\.\s*/, '').trim();
+          let rawTag = null;
+          let isBracketTag = false;
+          const match = cleanLine.match(/^\[(.*?)\]/);
+          
           if (match) {
-            const std = standardizeProjectName(match[1]);
+            rawTag = match[1].replace(/^\[+/, '').trim();
+            isBracketTag = true;
+          } else if (isMajorTag(standardizeProjectName(cleanLine))) {
+            rawTag = cleanLine;
+          }
+
+          if (rawTag) {
+            const std = standardizeProjectName(rawTag);
             if (std.includes(' - ')) {
               const parts = std.split(' - ');
               currentProject = parts[0].trim();
@@ -89,8 +100,10 @@ export default function WeeklyView({ reports, fetchReports }) {
           }
           
           // 태그 제거 후 텍스트 추출
-          let cleanText = line.replace(/\[.*?\]/, '').replace(/^[\s\-\*]+/, '').trim();
-          if (cleanText) {
+          let cleanText = isBracketTag ? cleanLine.replace(/^\[.*?\]/, '').replace(/^[\s\-\*]+/, '').trim() : '';
+          if (cleanText || (!rawTag && cleanLine)) {
+            if (!rawTag) cleanText = cleanLine.replace(/^[\s\-\*]+/, '').trim();
+            if (cleanText) {
             const textToPush = currentMinor ? `[${currentMinor}] ${cleanText}` : cleanText;
             projects[currentProject][taskType === 'thisWeekTask' ? 'thisWeek' : 'nextWeek'].push({
               user: report.name,
