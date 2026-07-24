@@ -349,7 +349,7 @@ textarea.form-control {
 /* --- Print Media Query for ReportView --- */
 @media print {
   @page {
-    size: A4 landscape;
+    size: A4 portrait;
     margin: 10mm;
   }
   .print-hide {
@@ -370,7 +370,7 @@ textarea.form-control {
     background-color: white !important;
     padding: 0 !important;
   }
-  .a4-paper-landscape {
+  .a4-paper-portrait {
     box-shadow: none !important;
     width: 100% !important;
     margin: 0 !important;

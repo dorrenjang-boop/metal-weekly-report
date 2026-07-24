@@ -74,7 +74,7 @@ export default function ReportView({ reports }) {
       <div className="print-controls" style={{ maxWidth: '297mm', margin: '0 auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', backgroundColor: '#fff', padding: '1rem 1.5rem', borderRadius: '12px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: '#1e40af', fontWeight: 600 }}>
           <Info size={20} />
-          <span>인쇄 설정 안내: 용지 방향을 반드시 '가로(Landscape)'로 설정해주세요.</span>
+          <span>인쇄 설정 안내: 용지 방향을 반드시 '세로(Portrait)'로 설정해주세요.</span>
         </div>
         <button 
           onClick={handlePrint}
@@ -102,10 +102,10 @@ export default function ReportView({ reports }) {
           이번 주(현재 주차)에 작성된 주간 업무 보고가 아직 없습니다.
         </div>
       ) : (
-        <div className="a4-paper-landscape" style={{
+        <div className="a4-paper-portrait" style={{
           backgroundColor: 'white',
-          width: '297mm',      // A4 Landscape Width
-          minHeight: '210mm',  // A4 Landscape Height
+          width: '210mm',      // A4 Portrait Width
+          minHeight: '297mm',  // A4 Portrait Height
           margin: '0 auto',
           padding: '15mm',
           boxShadow: '0 10px 25px rgba(0,0,0,0.1)',
