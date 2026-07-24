@@ -13,6 +13,9 @@ COPY backend/package*.json ./
 RUN npm install --production
 COPY backend/ ./
 
+# Copy the source directory so db.js can parse the xlsx files
+COPY source/ /app/source/
+
 # 3. Copy built frontend files to the expected directory
 # server_cloud.js expects them at ../frontend/dist
 COPY --from=frontend-builder /app/frontend/dist /app/frontend/dist

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Cpu, LayoutDashboard, PenSquare, History, CalendarDays, BarChart2, Printer, Calendar, Lock, Database, Activity, Hammer } from 'lucide-react';
+import { Cpu, LayoutDashboard, PenSquare, History, CalendarDays, BarChart2, Printer, Calendar, Lock, Database, Activity, Hammer, Menu } from 'lucide-react';
 import DashboardView from './components/DashboardView';
 import FormView from './components/FormView';
 import HistoryView from './components/HistoryView';
@@ -17,6 +17,7 @@ function App() {
   const [mainMenu, setMainMenu] = useState('weekly'); // 'weekly' or 'build_management'
   const [activeTab, setActiveTab] = useState('dashboard'); // sub-tabs
   const [buildTab, setBuildTab] = useState('board'); // 'board', 'oee', 'dashboard'
+  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [passwordInput, setPasswordInput] = useState('');
@@ -84,8 +85,8 @@ function App() {
   return (
     <div className="app-root" style={{ display: 'flex', height: '100vh', overflow: 'hidden', backgroundColor: 'var(--bg-secondary)' }}>
       {/* Left Main Sidebar */}
-      <div className="print-hide" style={{ width: '260px', backgroundColor: '#ffffff', borderRight: '1px solid var(--border-color)', display: 'flex', flexDirection: 'column', zIndex: 10 }}>
-        <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)' }}>
+      <div className="print-hide" style={{ width: isSidebarOpen ? '260px' : '0px', backgroundColor: '#ffffff', borderRight: isSidebarOpen ? '1px solid var(--border-color)' : 'none', display: 'flex', flexDirection: 'column', zIndex: 10, transition: 'width 0.3s ease', overflow: 'hidden' }}>
+        <div style={{ padding: '24px 20px', display: 'flex', alignItems: 'center', gap: '12px', borderBottom: '1px solid var(--border-color)', minWidth: '260px' }}>
           <Cpu size={28} color="var(--accent-primary)" />
           <span style={{ fontSize: '1.1rem', fontWeight: 'bold', color: 'var(--text-primary)' }}>금속기술팀 시스템</span>
         </div>
@@ -113,7 +114,10 @@ function App() {
         {mainMenu === 'weekly' && (
           <div className="app-container" style={{ margin: 0, height: '100%', borderRadius: 0, boxShadow: 'none' }}>
             <div className="top-nav print-hide" style={{ borderRadius: 0 }}>
-              <div className="nav-menu" style={{ margin: 0 }}>
+              <div className="nav-menu" style={{ margin: 0, display: 'flex', alignItems: 'center' }}>
+                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', marginRight: '0.5rem', display: 'flex', alignItems: 'center', color: 'var(--text-secondary)' }}>
+                  <Menu size={20} />
+                </button>
                 <div className={`nav-item ${activeTab === 'dashboard' ? 'active' : ''}`} onClick={() => setActiveTab('dashboard')}><LayoutDashboard size={18} />인사이트 대시보드</div>
                 <div className={`nav-item ${activeTab === 'weekly' ? 'active' : ''}`} onClick={() => setActiveTab('weekly')}><CalendarDays size={18} />주차별 업무</div>
                 <div className={`nav-item ${activeTab === 'analytics' ? 'active' : ''}`} onClick={() => setActiveTab('analytics')}><BarChart2 size={18} />주제·키워드 분석</div>
@@ -138,7 +142,10 @@ function App() {
         {mainMenu === 'build_management' && (
           <div className="app-container" style={{ margin: 0, height: '100%', borderRadius: 0, boxShadow: 'none' }}>
             <div className="top-nav print-hide" style={{ borderRadius: 0 }}>
-              <div className="nav-menu" style={{ margin: 0 }}>
+              <div className="nav-menu" style={{ margin: 0, display: 'flex', alignItems: 'center' }}>
+                <button onClick={() => setIsSidebarOpen(!isSidebarOpen)} style={{ background: 'none', border: 'none', cursor: 'pointer', padding: '0.5rem', marginRight: '0.5rem', display: 'flex', alignItems: 'center', color: 'var(--text-secondary)' }}>
+                  <Menu size={20} />
+                </button>
                 <div className={`nav-item ${buildTab === 'board' ? 'active' : ''}`} onClick={() => setBuildTab('board')}><Hammer size={18} />빌드 이력 보드</div>
                 <div className={`nav-item ${buildTab === 'oee' ? 'active' : ''}`} onClick={() => setBuildTab('oee')}><Activity size={18} />OEE 분석</div>
               </div>
