@@ -7,7 +7,7 @@ export const TAXONOMY = [
   },
   {
     major: "설비 운용 및 관리",
-    minors: ["A40PM3SN01(BLT-S400-3)", "A40PM3SN02(BLT-S400-3)", "A40PM4SN01(EOS M400-4)", "A29PM1SN01(EOS M290-1)", "A65PM8SN01(BLT S600-8)", "A65PM8SN02(BLT S600-8)", "A40PM6SN01(LiM X400-6)", "A15PM1SN01(LiM X150-1)"],
+    minors: ["A40PM3SN01(BLT-S400-3)", "A40PM3SN02(BLT-S400-3)", "A40PM4SN01(EOS M400-4)", "A25PM1SN01(EOS M290-1)", "A65PM8SN01(BLT S600-8)", "A65PM8SN02(BLT S600-8)", "A40PM6SN01(LiM X400-6)", "A15PM1SN01(LiM X150-1)"],
     customPrompt: null,
     description: "3D 프린터 등 장비 유지보수 및 점검 업무"
   },
