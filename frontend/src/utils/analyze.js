@@ -80,20 +80,32 @@ export function getTopicsFromKeywords(keywords) {
   return Array.from(foundTopics);
 }
 
-// Calculate week string (e.g. "2026년 4월 4주차")
+// Calculate week string (e.g. "2026년 8월 1주차")
+// 한국 KS 표준(목요일 기준) 적용
 export function getWeekString(dateString) {
   if (!dateString) return "날짜 미상";
   const date = new Date(dateString);
   if (isNaN(date.getTime())) return "날짜 미상";
 
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
+  const day = date.getDay();
+  const dayForMonStart = day === 0 ? 7 : day;
   
-  const firstDayOfMonth = new Date(year, date.getMonth(), 1);
-  const firstDayWeekday = firstDayOfMonth.getDay() === 0 ? 7 : firstDayOfMonth.getDay(); 
-  const offsetDate = date.getDate() + firstDayWeekday - 1;
-  const weekNumber = Math.ceil(offsetDate / 7);
+  const thursday = new Date(date);
+  thursday.setDate(date.getDate() - dayForMonStart + 4);
+
+  const year = thursday.getFullYear();
+  const month = thursday.getMonth() + 1;
+
+  const firstDayOfMonth = new Date(year, month - 1, 1);
+  const firstDayWeekday = firstDayOfMonth.getDay() === 0 ? 7 : firstDayOfMonth.getDay();
   
+  let firstThursdayDate = 1 + (4 - firstDayWeekday);
+  if (firstThursdayDate <= 0) {
+    firstThursdayDate += 7;
+  }
+  
+  const weekNumber = Math.floor((thursday.getDate() - firstThursdayDate) / 7) + 1;
+
   return `${year}년 ${month}월 ${weekNumber}주차`;
 }
 
